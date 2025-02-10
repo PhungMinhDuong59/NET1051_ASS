@@ -1,0 +1,54 @@
+﻿@model Combo
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="/@Url.Content(Model.ImagePath)" alt="@Model.Name" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6">
+            <h2>@Model.Name</h2>
+            <p><strong>Price:</strong> @Model.Price.ToString("N0") VND</p>
+            <p><strong>Description:</strong> @Model.Description</p>
+            <p><strong>Availability:</strong> @(Model.IsAvailable ? "Available" : "Not Available")</p>
+            <p><strong>Created Date:</strong> @Model.CreatedDate.ToString("dd/MM/yyyy")</p>
+            @{
+                var userRole = HttpContextAccessor.HttpContext.Session.GetString("UserRole");
+            }
+            @if (userRole != null && userRole.ToString() == "customer")
+            {
+                <form asp-action="AddComboToCart" asp-controller="Cart" method="post" class="mt-4">
+                    <input type="hidden" name="ComboID" value="@Model.ComboID" />
+                    <div class="form-group">
+                        <label for="Quantity">Quantity:</label>
+                        <input type="number" name="Quantity" id="Quantity" class="form-control" min="1" value="1" required />
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-cart-plus"></i> Add to Cart
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h3>Includes:</h3>
+        <ul class="list-group">
+            @foreach (var item in Model.ComboFoodItems)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <a href="@Url.Action("Detail", "Food", new { id = item.FoodItemID })" class="text-decoration-none text-dark">
+                            <strong>@item.FoodItem.Name</strong></a> - @item.FoodItem.Description
+                    </span>
+                    <span class="badge badge-primary badge-pill">Quantity: @item.Quantity</span>
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="mt-4">
+        <a href="@Url.Action("Index", "Combo")" class="btn custom-btn">
+            <i class="fa fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
